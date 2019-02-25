@@ -1,0 +1,22 @@
+{
+  "name": "pinkistate",
+  "version": "0.1.0",
+  "description": "Stand-alone & un-opinionated/framework-agnostic micro-state management tool",
+  "main": "./pinkistate.js",
+  "scripts": {
+    "browserify-example": "./node_modules/.bin/browserify --debug ./example/timer.js > ./example/timer.bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/benqus/pinkistate.git"
+  },
+  "author": "Bence Kormos <kormos.bence@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/benqus/pinkistate/issues"
+  },
+  "homepage": "https://github.com/benqus/pinkistate#readme",
+  "devDependencies": {
+    "browserify": "^16.2.3"
+  }
+}
