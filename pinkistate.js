@@ -5,7 +5,7 @@
  * @returns {{ trigger: (function(*)), transform: (function(Function)), read: (function()) }}
  */
 module.exports = (state = {}, onchange = () => {}) => {
-    const executeBeforeTrigger = (typeof state === 'function');
+    const isFunction = (typeof state === 'function');
     const transformers = [];
     let triggerQueue = [];
     let triggerQueueTimeout;
@@ -17,7 +17,7 @@ module.exports = (state = {}, onchange = () => {}) => {
     };
 
     const _triggerQueued = () => {
-        const _state = (executeBeforeTrigger ? state() : state);
+        const _state = read();
         triggerQueueTimeout = clearTimeout(triggerQueueTimeout);
         triggerQueue.forEach(payload => _triggerPayload(_state, payload));
         triggerQueue = [];
@@ -26,7 +26,7 @@ module.exports = (state = {}, onchange = () => {}) => {
     /**
      * Return actual state
      */
-    const read = () => state;
+    const read = () => (isFunction ? state() : state);
 
     /**
      * Trigger state transform with payload
