@@ -80,7 +80,7 @@ const parentState = pinkistate(defaultState, (newState, oldState) => {
 });
 ```
 
-### onChange
+### onchange
 
 Change handler is used to notify your View/Component tree to re-render itself or to distribute a state via a socket connection, etc.
 
