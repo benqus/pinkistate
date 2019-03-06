@@ -117,10 +117,19 @@ Transformers are methods that get invoked with the latest state, the old state a
 Think of them as redux reducers - but in a more generic way.
 There's nothing stopping you from using a `type` field in your payload and use the tool similar to how a redux reducer works or to implement your own logic around this.
 
-> **Note:** in order to invoke the `onchange` callback method, the state must be a different reference from the old one!
+> **Note:** in order to invoke the `onchange` callback method, the state must be a different value or object reference from the old one!
 
 ```js
+// this will work
 myState.transform((state, payload) => ({ ...state, ...payload }));
+myState.trigger({ sayHi: "Hello World!" });
+
+// this will work as well
+myState.transform((state, payload) => ({ ...payload }));
+myState.trigger({ sayHi: "Hello World!" });
+
+// this WON'T work!
+myState.transform((state, payload) => state);
 myState.trigger({ sayHi: "Hello World!" });
 ```
 
