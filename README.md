@@ -6,78 +6,59 @@ Stand-alone & un-opinionated/framework-agnostic micro-state management tool
 Pinkistate is great for managing application state(s) in a generic manner therefore it makes it easy to migrate/refactor your state-management.
 You have the freedom to implement a redux action-like transformer method or a more generic, event-based based one with custom fields.
 
+A good example/case for micro-states is a system where a user can be logged in from multiple devices at once that need to share the user state - via WebSockets maybe.  
+In this case a user client entity can aggregate the state changes into a micro-state and broadcast them to all the client connections.
+Of course this all depends on software design, this is just one possible example. :sunglasses: 
+
 ### Concept
 
 One minimal source file that is easily understandable, debuggable and includable in the source code.
 Transpilation is completely up to you.
 
-Minimalistic API with 3 methods:
+Minimalistic API with 4 methods:
 - Trigger - trigger state transform with payload
 - Transform - merge payload into state
+- Change - callback for when the state changes
 - Read - return actual state
 
 **!!! IMPORTANT !!!** Pinkistate is - currently - a Node module so you must include the source file in your project's build if you're using it for the browser environment!
 
 ### Micro state
 
-In order to create a micro state you need 2 prerequisites
-1. A default state
+In order to create a micro state you need 2 things
+1. A default state (optional)
 1. A change handler - this gets invoked every time the state changes
 
 ```js
 const pinkistate = require('pinkistate');
 
+// create micro-state with default state
+const defaultState = {};
+const myState = pinkistate(defaultState);
 
-// Micro state change handler
-const onChange = (newState, oldState, triggerPayload) => {
+// micro-state change handler
+const onchange = (newState, oldState, triggerPayload) => {
     // do something when state changes
 };
 
-// create micro-state with default state and onChange handler
-const defaultState = {};
-const myState = pinkistate(defaultState, onChange);
+// register onchange handler
+myState.onchange(onchange);
 ```
 
 You can also deconstruct the state API if need be
 
 ```js
-const { trigger, transform, read } = ps(defaultState, onChange);
+const { trigger, transform, read, onchange } = ps(defaultState, onChange);
 ```
 
 ### defaultState
 
 Default state can be any value except `undefined`.
 
+`undefined` will default to an empty object (`{}`);
+
 ```js
 const defaultState = {};
-```
-
-It can even be a `function` if need be.
-In this case the function is invoked every time the batched triggers are executed.
-Bear in mind that `function` type default states might introduce a fair amount of confusion into your code base.
-However they are a way to compose/group/nest multiple micro-state changes into one change handler (higher-order state).
-
-An example would be
-
-```js
-const childState1 = ps({}, (state) => {
-    // do some thing
-});
-
-const childState2 = ps({}, (state) => {
-    // do another something
-});
-
-const defaultState = () => {
-    const cState1 = childState1.read();
-    const cState2 = childState2.read();
-    return { ...cState1, ...cState2 };
-};
-
-const parentState = pinkistate(defaultState, (newState, oldState) => {
-    // oldState is the return value of the defaultState method above
-    // newState is the modified default state
-});
 ```
 
 ### onchange

@@ -1,50 +1,65 @@
 /**
  * Create a micro-state scope
- * @param {*|function} state
- * @param {function} onchange
- * @returns {{ trigger: (function(*)), transform: (function(Function)), read: (function()) }}
+ * @param {*} [state]
+ * @returns {{transform: (function(Function): number), read: (function()), onchange: (function(Function): Function), trigger: trigger}}
  */
-module.exports = (state = {}, onchange = () => {}) => {
-    const isFunction = (typeof state === 'function');
-    const transformers = [];
-    let triggerQueue = [];
-    let triggerQueueTimeout;
+module.exports = (state = {}) => {
+  if (typeof state === 'function') throw Error("Default state cannot be a function!");
+  const transformers = [];
+  let triggerQueue = [];
+  let triggerTimeout;
+  let _onChange = () => {};
 
-    const _triggerPayload = (state, payload) => {
-        const oldState = state;
-        transformers.forEach(fn => state = (fn(state, payload) || state));
-        if (oldState !== state) onchange(state, oldState, payload);
-    };
+  const _triggerPayload = (payload) => {
+    const oldState = state;
+    transformers.forEach(fn => state = (fn(state, payload) || state));
+    if (oldState !== state) _onChange(state, oldState, payload);
+  };
 
-    const _triggerQueued = () => {
-        const _state = read();
-        triggerQueueTimeout = clearTimeout(triggerQueueTimeout);
-        triggerQueue.forEach(payload => _triggerPayload(_state, payload));
-        triggerQueue = [];
-    };
+  const _triggerQueued = () => {
+    triggerTimeout = clearTimeout(triggerTimeout);
+    triggerQueue.forEach(_triggerPayload);
+    triggerQueue = [];
+  };
 
-    /**
-     * Return actual state
-     */
-    const read = () => (isFunction ? state() : state);
+  /**
+   * Return actual state
+   * @public
+   * @returns {*}
+   */
+  const read = () => state;
 
-    /**
-     * Trigger state transform with payload
-     * (Batch and queue payloads to be triggered together on the next execution frame)
-     * @param {object} payload
-     */
-    const trigger = (payload) => {
-        if (typeof payload === 'function') return payload(trigger);
-        triggerQueue.push(payload);
-        if (triggerQueueTimeout) return;
-        triggerQueueTimeout = setTimeout(() => _triggerQueued(), 0);
-    };
+  /**
+   * Trigger state transform with payload
+   * (Batch and queue payloads to be triggered together on the next execution frame)
+   * @public
+   * @param {object} [payload]
+   */
+  const trigger = (payload) => {
+    if (typeof payload === 'function') return payload(trigger);
+    triggerQueue.push(payload);
+    if (!triggerTimeout) triggerTimeout = setTimeout(_triggerQueued, 0);
+  };
 
-    /**
-     * Register a transformer function to merge payloads into the state
-     * @param {function} fn
-     */
-    const transform = (fn) => transformers.push(fn);
+  /**
+   * Register a transformer function to merge payloads into the state
+   * @public
+   * @param {function} fn
+   */
+  const transform = (fn) => {
+    if (typeof fn !== 'function') throw Error("transformer must be a function!");
+    transformers.push(fn);
+  };
 
-    return { read, trigger, transform };
+  /**
+   * Register listener for when the state changes
+   * @public
+   * @param {function} fn
+   */
+  const onchange = (fn) => {
+    if (typeof fn !== 'function') throw Error("onchange listener must be a function!");
+    _onChange = fn;
+  };
+
+  return { read, trigger, transform, onchange };
 };

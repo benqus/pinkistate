@@ -1,6 +1,6 @@
 {
   "name": "pinkistate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Stand-alone & un-opinionated/framework-agnostic micro-state management tool",
   "main": "./pinkistate.js",
   "scripts": {
@@ -20,6 +20,7 @@
   "devDependencies": {
     "browserify": "^16.2.3",
     "chai": "^4.2.0",
-    "mocha": "^6.0.2"
+    "mocha": "^6.0.2",
+    "sinon": "^7.2.7"
   }
 }
