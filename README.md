@@ -10,14 +10,14 @@ A good example/case for micro-states is a system where a user can be logged in f
 In this case a user client entity can aggregate the state changes into a micro-state and broadcast them to all the client connections.
 Of course this all depends on software design, this is just one possible example. :sunglasses: 
 
-### Concept
+### Concept/Motivation
 
-One minimal source file that is easily understandable, debuggable and includable in the source code.
-Transpilation is completely up to you.
+One minimal source file that is easily understandable, debuggable leaving a short call-stack ergo having minimal impact in the execution frame.
+(This of course depends on you as a developer/engineer as well).
 
 Minimalistic API with 4 methods:
 - Trigger - trigger state transform with payload
-- Transform - merge payload into state
+- Transform - update/transform/mutate state
 - Change - callback for when the state changes
 - Read - return actual state
 
@@ -95,8 +95,10 @@ myState.trigger(myTrigger);
 ### Transformers
 
 Transformers are methods that get invoked with the latest state, the old state and payload that triggered them.
-Think of them as redux reducers - but in a more generic way.
-There's nothing stopping you from using a `type` field in your payload and use the tool similar to how a redux reducer works or to implement your own logic around this.
+Transformers may act as middlewares (ExpressJS) or reducer-like (Redux) methods.
+You pick your own solution, here's nothing stopping you from using a `type` field in your payload and use the tool similar to how a redux reducer works or to implement your own logic around this.
+
+Transformers are executed synchronously!
 
 > **Note:** in order to invoke the `onchange` callback method, the state must be a different value or object reference from the old one!
 
